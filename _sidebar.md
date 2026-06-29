@@ -1,5 +1,8 @@
 - React
   - [Aide-mémoire React Native](react/aide-memoire-react-native.md)
   - [📄 Guide complet React/RN (PDF)](/react/claude_guide_react_native.pdf ':ignore')
+  - [📄 Guide React hooks (PDF)](/react/claude_guide_react_hooks.pdf ':ignore')
+- Javascript
+  - [📄 Guide Promises (PDF)](/javascript/claude_guide_promises_async_await.pdf ':ignore')
 - Symfony
   - (à venir)
