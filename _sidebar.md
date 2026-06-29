@@ -1,3 +1,4 @@
+- [Accès](acces.md)
 - React
   - [Aide-mémoire React Native](react/aide-memoire-react-native.md)
   - [📄 Guide complet React/RN (PDF)](react/claude_guide_react_native.pdf ':ignore')
@@ -7,4 +8,4 @@
 - Symfony
   - (à venir)
 - BVP
-  - [Doc app React Native](bvp/bvp-app-documentation.md)&nbsp;[pdf](bvp/claude_guide_bvp_react_native.pdf ':ignore')
+  - <span class="bvp-item">Doc app React Native&nbsp;<a class="bvp-link" href="#/bvp/bvp-app-documentation">md</a>&nbsp;<a class="bvp-link" href="bvp/claude_guide_bvp_react_native.pdf">pdf</a></span>
