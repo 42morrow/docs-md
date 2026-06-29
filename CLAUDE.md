@@ -53,6 +53,24 @@ docs-md/
 
 5. **Convention de nommage des PDF générés par Claude** : préfixe `claude_guide_` suivi du sujet en snake_case, par exemple `claude_guide_react_hooks.pdf`, `claude_guide_promises_async_await.pdf`.
 
+6. **Tout nouveau document doit exister en deux formats : `.md` ET `.pdf`**. Le `.md` permet la lecture en ligne dans docsify, le `.pdf` permet la lecture hors-ligne. Conversion via Chrome headless (pandoc non disponible sur la machine) :
+   ```bash
+   # 1. Convertir le .md en HTML stylisé via Python
+   python3 -c "import markdown, pathlib; ..."  # voir session précédente
+   # 2. Convertir le HTML en PDF
+   google-chrome --headless --disable-gpu --print-to-pdf=fichier.pdf --print-to-pdf-no-header fichier.html
+   ```
+
+7. **Format d'entrée dans `_sidebar.md` pour les docs dual-format** (titre non-cliquable + liens md et pdf sur la même ligne) :
+   ```markdown
+   - <span class="bvp-item">Titre du document&nbsp;<a class="bvp-link" href="#/dossier/fichier">md</a>&nbsp;<a class="bvp-link" href="dossier/fichier.pdf">pdf</a></span>
+   ```
+   Les classes `.bvp-item` et `.bvp-link` sont définies dans `index.html` (vert `#42b983`, `display:inline !important` pour contrer le `display:block` du thème docsify).
+
+8. **Tous les chemins dans `_sidebar.md` doivent être relatifs** (sans `/` initial). Un chemin absolu comme `/react/fichier.pdf` casse sur GitHub Pages qui sert le dépôt depuis le sous-chemin `/docs-md/`.
+
+9. **`README.md` racine = page d'accueil statique**, message de bienvenue uniquement. Ne jamais y ajouter de liens vers les documents — toute la navigation passe par `_sidebar.md`.
+
 ## À savoir sur le service local (pour mémoire)
 
 - Le service `docsify serve` tourne en local via un service systemd utilisateur : `~/.config/systemd/user/docsify-docs.service`, sur le port `6419`.
