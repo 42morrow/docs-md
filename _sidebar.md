@@ -7,4 +7,4 @@
 - Symfony
   - (à venir)
 - BVP
-  - Documentation app React Native — [md](bvp/bvp-app-documentation.md) [pdf](bvp/claude_guide_bvp_react_native.pdf ':ignore')
+  - [Doc app React Native](bvp/bvp-app-documentation.md)&nbsp;[pdf](bvp/claude_guide_bvp_react_native.pdf ':ignore')
