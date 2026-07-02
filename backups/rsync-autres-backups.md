@@ -3,6 +3,10 @@
 Ce répertoire centralise des sauvegardes locales de contenus hébergés à
 distance (o2switch, etc.), synchronisées via des scripts `rsync.sh`.
 
+Pour que la doc Autres_backups/CLAUDE.md soit recopiée dans le répertoire
+docs-md, lancer claude depuis /media/laurent/42morrow_4To_backups, c'est dans
+ce répertoire que se trouve le hook de recopie.
+
 ## Principe général
 
 Chaque sous-répertoire synchronisé fonctionne en **miroir distant -> local** :
@@ -38,6 +42,37 @@ Exécution réelle :
 Ce script a été validé sur un couple de répertoires de test
 (`test_backup_via_rsync` en local / `test_backup_via_rsync_remote` en
 distant) avant d'être appliqué à `Mallozzi_images`.
+
+```bash
+#!/usr/bin/env bash
+#
+# Miroir distant (o2switch) -> local du dossier Mallozzi_images.
+# Le DISTANT fait foi : un fichier supprime cote distant est supprime en
+# local, un fichier absent en local mais present cote distant est restaure.
+#
+# Usage:
+#   ./rsync.sh          synchronisation reelle
+#   ./rsync.sh --dry-run   simulation, aucun fichier modifie/supprime
+
+set -euo pipefail
+
+LOCAL_DIR="/media/laurent/42morrow_4To_backups/Autres_backups/Mallozzi_images/"
+REMOTE_USER="arre1332"
+REMOTE_HOST="pacanier.o2switch.net"
+REMOTE_DIR="/home/arre1332/connivence/public/images_articles_v2/mallozzi/"
+
+RSYNC_OPTS=(-avh --delete --progress --stats)
+
+if [[ "${1:-}" == "--dry-run" ]]; then
+    RSYNC_OPTS+=(--dry-run)
+    echo "== Mode simulation (dry-run) =="
+fi
+
+rsync "${RSYNC_OPTS[@]}" \
+    -e "ssh -o IdentitiesOnly=yes" \
+    "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}" \
+    "$LOCAL_DIR"
+```
 
 ## Ajouter un nouveau rsync
 
