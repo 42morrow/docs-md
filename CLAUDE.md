@@ -88,5 +88,6 @@ docs-md/
 - `react/claude_guide_react_hooks.pdf` — guide approfondi sur les 6 hooks de base (useState, useEffect, useContext, useMemo, useCallback, useRef).
 - `javascript/claude_guide_promises_async_await.pdf` — Promises JS, usage pratique + approfondissement théorique sur async/await (event loop, microtasks/macrotasks).
 - `bvp/bvp-app-documentation.md` + `bvp/claude_guide_bvp_react_native.pdf` — Documentation technique et fonctionnelle de l'app BVP React Native (migration Cordova → Expo SDK 54) : architecture, DB SQLite, API Symfony, synchro, écrans, env de dev, roadmap.
+- `backups/rsync-autres-backups.md` + `backups/claude_guide_rsync_autres_backups.pdf` — Documentation des sauvegardes locales de contenus distants via scripts rsync (principe miroir distant→local, exemple Mallozzi_images, procédure d'ajout d'un nouveau rsync).
 
 *Mettre à jour cette liste à chaque nouveau document ajouté, pour qu'une future session Claude Code ait le contexte de ce qui existe déjà et évite les doublons.*
