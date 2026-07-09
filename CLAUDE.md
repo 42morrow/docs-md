@@ -5,7 +5,9 @@ Ce dépôt contient une documentation personnelle technique (React, React Native
 ## Dépôt Git
 
 - Remote GitHub configuré : `git remote add github git@github.com:42morrow/docs-md.git`
+- Remote `origin` : hébergement OVH (`ftp.cluster010.hosting.ovh.net`), qui sert la doc en ligne. Ce remote est inaccessible en push depuis cette machine (pas de clé SSH acceptée) — c'est le serveur OVH qui doit **puller** depuis GitHub, à la main, pas l'inverse.
 - Le dossier local est `docs-md/`, racine du dépôt.
+- **Après tout `git push github master`** (ou tout commit destiné à être publié), terminer la réponse par un rappel : *"N'oublie pas de puller depuis OVH (/homez.2187/morrow/docs-md)"*.
 
 ## Structure du projet
 
