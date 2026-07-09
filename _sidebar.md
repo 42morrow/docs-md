@@ -5,8 +5,7 @@
   - [📄 Guide React hooks (PDF)](react/claude_guide_react_hooks.pdf ':ignore')
 - Javascript
   - [📄 Guide Promises (PDF)](javascript/claude_guide_promises_async_await.pdf ':ignore')
-- Symfony
-  - (à venir)
+- <span class="bvp-item">Symfony&nbsp;<a class="bvp-link" href="#/symfony/">md</a>&nbsp;<a class="bvp-link" href="symfony/claude_guide_symfony.pdf">pdf</a></span>
 - BVP
   - <span class="bvp-item">Doc app React Native&nbsp;<a class="bvp-link" href="#/bvp/bvp-app-documentation">md</a>&nbsp;<a class="bvp-link" href="bvp/claude_guide_bvp_react_native.pdf">pdf</a></span>
 - Backups
