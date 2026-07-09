@@ -1,11 +1,13 @@
 # Symfony
 
-Notes techniques Symfony pour le projet **Synoptic** (application B2B de prise
-de commande, Symfony 7.2). Une section par sujet documenté.
+Notes techniques Symfony. Une section par sujet documenté.
 
 ## Cache et environnements multi-tenant (Symfony Runtime / Doctrine / Twig)
 
 ### Contexte
+
+Paramétrage effectué pour le projet **Synoptic** (application B2B de prise
+de commande, Symfony 7.2).
 
 Synoptic utilise le **nom de l'environnement Symfony comme identifiant de
 tenant** : `synoptic`, `preprod`, et potentiellement d'autres clients à
