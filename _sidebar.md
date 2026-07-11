@@ -10,3 +10,5 @@
   - <span class="bvp-item">Doc app React Native&nbsp;<a class="bvp-link" href="#/bvp/bvp-app-documentation">md</a>&nbsp;<a class="bvp-link" href="bvp/claude_guide_bvp_react_native.pdf">pdf</a></span>
 - Backups
   - <span class="bvp-item">Sauvegardes rsync (Autres_backups)&nbsp;<a class="bvp-link" href="#/backups/rsync-autres-backups">md</a>&nbsp;<a class="bvp-link" href="backups/claude_guide_rsync_autres_backups.pdf">pdf</a></span>
+- Serveurs
+  - <span class="bvp-item">Serveur HDS Mylbe (Épione / ISIS)&nbsp;<a class="bvp-link" href="#/serveurs/serveur-hds-mylbe">md</a>&nbsp;<a class="bvp-link" href="serveurs/claude_guide_serveur_hds_mylbe.pdf">pdf</a></span>
