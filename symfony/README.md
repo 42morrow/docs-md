@@ -102,6 +102,9 @@ production (fichier **non versionné**, géré à la main par serveur) :
 
 ```apache
 SetEnvIf Host  ^synoptic-v2.amshop.fr APP_ENV=synoptic
+# Depuis le 20/07/2026, APP_DEBUG=0 est aussi forcé par défaut via .env.synoptic (voir
+# section "Suite (2026-07-20)" plus bas) : cette ligne n'est plus strictement nécessaire,
+# gardée par sécurité (défense en profondeur pour le trafic HTTP public).
 SetEnvIf Host  ^synoptic-v2.amshop.fr APP_DEBUG=0
 ```
 
@@ -295,3 +298,14 @@ TODO posé dans le `CLAUDE.md` de chaque projet :
   `when@epione:` sans condition de debug), profiler encore peu volumineux
   au 20/07/2026 (24 Ko) donc pas de crise immédiate contrairement à
   Synoptic, mais la faille de fond est identique.
+
+### `.htaccess` conservé, mais annoté (21/07/2026)
+
+Le `SetEnvIf ... APP_DEBUG=0` de prod (voir *"Solution retenue"* plus haut)
+n'a pas été supprimé : gardé volontairement comme filet de sécurité pour le
+trafic HTTP public, indépendant des fichiers `.env.*`. Un commentaire a
+simplement été ajouté au-dessus, dans le `.htaccess` réel du serveur, pour
+expliquer qu'il n'est plus strictement nécessaire depuis le correctif du
+20/07/2026 mais qu'il reste intentionnellement en place. Vérifié après
+modification : `kernel.debug` toujours `false`, page d'accueil toujours en
+`200`.
