@@ -172,15 +172,23 @@ reconstruit que le cache **Debug**, jamais utilisé par le site réel. Les
 modifications ne semblent donc "pas prises en compte" après un
 `cache:clear` — en fait, c'est le mauvais cache qui a été vidé.
 
-**Commande correcte pour vider le cache réellement utilisé en prod** :
+~~**Commande correcte pour vider le cache réellement utilisé en prod**~~ :
 
 ```bash
 APP_DEBUG=0 php bin/console cache:clear --env=synoptic
 ```
 
-Comme pour `APP_ENV`, une vraie variable d'environnement shell est
+~~Comme pour `APP_ENV`, une vraie variable d'environnement shell est
 protégée contre toute réécriture par les fichiers `.env.*`, donc ça force
-fiablement `debug=false` pour cette invocation.
+fiablement `debug=false` pour cette invocation.~~
+
+> **Mise à jour 2026-07-20 (projet Synoptic uniquement)** : ce
+> contournement manuel n'est plus nécessaire sur Synoptic, remplacé par un
+> correctif pérenne — voir section *"Suite (2026-07-20)"* plus bas.
+> **BVP et Épione (Symfony 7) n'ont pas encore été adaptés à la date du
+> 21/07/2026 et dépendent toujours de ce contournement manuel** : sur ces
+> deux projets, la commande ci-dessus (avec le préfixe `APP_DEBUG=0`) reste
+> la seule façon fiable de vider le cache réellement utilisé en prod.
 
 ### Récapitulatif des fichiers modifiés (session du 2026-07-09)
 
@@ -190,3 +198,100 @@ fiablement `debug=false` pour cette invocation.
 | `.env.synoptic` (dev + prod) | Ligne `APP_ENV=prod` commentée |
 | `.htaccess` (prod uniquement, non versionné) | Ajout de `SetEnvIf Host ^synoptic-v2.amshop.fr APP_DEBUG=0` |
 | `clear-cache.sh` | Ajout de `APP_DEBUG=0` sur les invocations `--env=synoptic` / `--env=preprod` |
+
+## Suite (2026-07-20, projet Synoptic) — correctif pérenne de `APP_DEBUG`, et profiler actif en prod
+
+### Remplacer le contournement CLI par un vrai correctif
+
+Le contournement du 09/07 (préfixer `APP_DEBUG=0` à la main sur chaque
+commande CLI) fonctionne mais dépend de la mémoire de l'opérateur — un
+`cache:clear` lancé sans le préfixe reconstruit silencieusement le mauvais
+cache (`...DebugContainer`). Solution retenue : poser `APP_DEBUG=0`
+directement dans `.env.synoptic` (versionné, déployé sur le vrai serveur).
+
+**Ça ne contredit pas le mécanisme décrit plus haut**, qui protège contre
+l'écrasement d'une **vraie variable d'environnement déjà positionnée**
+(`$_SERVER`, via `SetEnvIf` Apache ou un préfixe shell explicite) — c'est
+un mécanisme différent de la **cascade normale entre fichiers `.env.*`**
+(`.env` → `.env.local` → `.env.$env` → `.env.$env.local`), où chaque
+fichier chargé plus tard écrase bien la valeur du précédent pour une même
+clé. Concrètement :
+
+- **Trafic HTTP réel** : Apache pose déjà `APP_DEBUG=0` via `SetEnvIf`
+  avant que Dotenv ne s'exécute → la nouvelle ligne dans `.env.synoptic`
+  est inerte pour ce cas (même valeur, aucun conflit).
+- **CLI (SSH/cron)** : aucune vraie variable d'environnement n'est
+  positionnée en amont → c'est la valeur déclarée dans `.env.synoptic`
+  (`0`) qui s'applique par défaut, sans plus jamais dépendre d'un préfixe
+  manuel.
+- **Poste de dev**, où `APP_ENV=synoptic` est aussi utilisé en local pour
+  cibler ce tenant : `.env.synoptic.local` (non versionné) surcharge à
+  nouveau avec `APP_DEBUG=1`, dernier fichier de la cascade à être chargé
+  → le debug local reste actif, comme avant.
+
+Vérifié après coup, sur le serveur de prod réel et sans aucun préfixe :
+
+```bash
+php bin/console debug:container --env=synoptic --parameter=kernel.debug
+# => false
+time php bin/console cache:clear --env=synoptic
+# => "with debug false", ~3,4s
+```
+
+### Le profiler tournait en prod, indépendamment du debug
+
+Autre effet du même choix architectural (nom d'environnement = identifiant
+de tenant) : `config/bundles.php` enregistrait `WebProfilerBundle` pour
+l'environnement `synoptic` explicitement (`'synoptic' => true`, en plus de
+`dev`/`test` — **ce n'est pas le comportement par défaut d'une nouvelle
+app Symfony**, qui ne l'active que pour `dev`/`test`). Et
+`config/packages/web_profiler.yaml` avait un bloc `when@synoptic:` activant
+`framework.profiler` **sans aucune condition liée au debug**.
+
+Conséquence : le profiler écrivait un fichier par requête HTTP en vraie
+prod, avec du vrai trafic client, en continu, depuis des mois. Le
+`cache:clear` (dont l'étape finale supprime récursivement, fichier par
+fichier, l'ancien répertoire de cache renommé) mettait alors **plus de 15
+minutes** à s'exécuter sur l'hébergement mutualisé — indice qui a mené au
+diagnostic : un répertoire `.!!<hash>` abandonné depuis plusieurs semaines
+a été retrouvé sur le serveur, preuve qu'un précédent `cache:clear` n'avait
+jamais été mené à son terme.
+
+**Solution retenue, même principe que pour `APP_DEBUG`** — gater la
+collecte du profiler sur un nouvel env var plutôt que sur le nom
+d'environnement :
+
+```yaml
+# config/packages/web_profiler.yaml, bloc when@synoptic:
+framework:
+    profiler:
+        collect: '%env(bool:PROFILER_COLLECT)%'
+```
+
+`PROFILER_COLLECT=0` dans `.env.synoptic` (vraie prod), `PROFILER_COLLECT=1`
+dans `.env.synoptic.local` (poste de dev) — même schéma de surcharge que
+`APP_DEBUG` ci-dessus.
+
+### Récapitulatif des fichiers modifiés (session du 2026-07-20, commit `3b97a0b`)
+
+| Fichier | Changement |
+|---|---|
+| `.env.synoptic` (dev + prod) | Ajout de `APP_DEBUG=0` et `PROFILER_COLLECT=0` |
+| `.env.synoptic.local` (poste de dev, non versionné) | Ajout de `APP_DEBUG=1` et `PROFILER_COLLECT=1` (surcharges) |
+| `config/packages/web_profiler.yaml` | `framework.profiler.collect` piloté par `%env(bool:PROFILER_COLLECT)%` sous `when@synoptic:` |
+
+### État des autres projets utilisant ce même schéma (nom d'env = tenant)
+
+Vérifié le 20/07/2026, ni l'un ni l'autre n'a encore reçu ce correctif —
+TODO posé dans le `CLAUDE.md` de chaque projet :
+
+- **BVP** (`bvp/CLAUDE.md`) : a le piège `APP_DEBUG`/CLI (même cause,
+  `APP_ENV=bvp` ≠ `prod`), mais **pas** le problème de profiler —
+  `config/bundles.php` n'y active `WebProfilerBundle` que pour `dev`/`test`,
+  conformément au comportement par défaut de Symfony (c'est bien Synoptic
+  et Épione qui dérogent à ce défaut, pas l'inverse).
+- **Épione Symfony 7.2** (`sf7.2_epione/CLAUDE.md`) : cumule les deux
+  problèmes, `APP_DEBUG`/CLI et profiler actif en prod (même
+  `when@epione:` sans condition de debug), profiler encore peu volumineux
+  au 20/07/2026 (24 Ko) donc pas de crise immédiate contrairement à
+  Synoptic, mais la faille de fond est identique.
